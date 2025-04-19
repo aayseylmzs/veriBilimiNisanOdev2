@@ -8,6 +8,10 @@ from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, classifi
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 df = pd.read_csv('abg_dataset_300.csv')
 
@@ -74,11 +78,11 @@ plt.show()
 #Bu oran, modelin genel anlamda %62 doğru tahmin yaptığına işaret ediyor. Ancak, F1 skoru düşük olduğundan, bazı sınıflarda çok düşük başarı var. Özellikle "Metabolic Acidosis" ve "Respiratory Alkalosis" gibi az örneklemli sınıflar için model doğru tahmin yapamıyor.
 #sınıflar dengesiz olduğundan model çoğunlukla normal olarak tahmin ediyor
 
-# Random Forest modelini oluştur
+# Random Forest modeli
 rf_model = RandomForestClassifier(n_estimators=100, random_state=42)
 rf_model.fit(X_train, y_train)
 
-# Özelliklerin önemini al
+# Özelliklerin önemi
 feature_importances = rf_model.feature_importances_
 
 # Özellik adları ve önem düzeylerini göster
@@ -91,3 +95,33 @@ feature_data = pd.DataFrame({
 feature_data = feature_data.sort_values(by='Importance', ascending=False)
 
 print(feature_data)
+
+#NİSAN AYI ODEV 1
+#KNN MODELİ
+
+knn_model = KNeighborsClassifier(n_neighbors=5)  # k=5 (yakın 5 komşu)
+knn_model.fit(X_train, y_train)
+#TAHMİN
+y_pred_knn = knn_model.predict(X_test)
+#DOĞRULUK SKORU
+
+print("🔍 KNN Doğruluk (Accuracy):", accuracy_score(y_test, y_pred_knn))
+print("\n📊 Karışıklık Matrisi:")
+cm_knn = confusion_matrix(y_test, y_pred_knn)
+plt.figure(figsize=(8,6))
+sns.heatmap(cm_knn, annot=True, fmt='d', xticklabels=le_diagnosis.classes_, yticklabels=le_diagnosis.classes_, cmap="Blues")
+plt.title("KNN - Karışıklık Matrisi")
+plt.xlabel("Tahmin Edilen")
+plt.ylabel("Gerçek")
+plt.show()
+
+# KNN Doğruluk (Accuracy): 0.5166666666666667
+
+# KNN modelinde farklı k değerleri ile optimizasyon yapmak
+for k in [3, 5, 7, 9, 11]:
+    knn_model = KNeighborsClassifier(n_neighbors=k)
+    knn_model.fit(X_train, y_train)
+    y_pred_knn = knn_model.predict(X_test)
+    print(f"\nK = {k} - Doğruluk:", accuracy_score(y_test, y_pred_knn))
+
+
